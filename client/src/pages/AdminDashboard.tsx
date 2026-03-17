@@ -43,8 +43,8 @@ const AdminDashboard: React.FC = () => {
     setLoading(true);
     try {
       const [{ data: sData }, { data: aData }] = await Promise.all([
-        api.get('/admin/students'),
-        api.get('/admin/analytics')
+        api.get('admin/students'),
+        api.get('admin/analytics')
       ]);
       setStudents(sData);
       setAnalytics(aData);
@@ -65,7 +65,7 @@ const AdminDashboard: React.FC = () => {
 
   const handleExportStudents = async () => {
     try {
-      const res = await api.get('/export/students', { responseType: 'blob' });
+      const res = await api.get('export/students', { responseType: 'blob' });
       const url = URL.createObjectURL(res.data);
       const a = document.createElement('a');
       a.href = url;
@@ -311,7 +311,7 @@ const AdminDashboard: React.FC = () => {
                                   <p className="text-text-muted font-medium italic">Create and oversee technical validation modules.</p>
                                </div>
                                <button 
-                                 onClick={() => { window.scrollTo({ bottom: 0, behavior: 'smooth' })}}
+                                 onClick={() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}}
                                  className="btn-primary flex items-center gap-2 py-3 px-6 h-12"
                                >
                                   <FlaskConical size={20} /> Create New Assessment
@@ -341,7 +341,7 @@ const ActiveQuizzes: React.FC<{ onSelect: (id: string) => void }> = ({ onSelect 
    
    const fetchQuizzes = async () => {
       try {
-         const { data } = await api.get('/admin/quizzes');
+         const { data } = await api.get('admin/quizzes');
          setQuizzes(data);
       } catch (err) {
          console.error(err);

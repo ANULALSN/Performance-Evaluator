@@ -34,7 +34,7 @@ const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose }) => {
 
   const fetchQuiz = useCallback(async () => {
     try {
-      const { data } = await api.get(`/quizzes/${quizId}`);
+      const { data } = await api.get(`quizzes/${quizId}`);
       setQuiz(data);
       setTimeLeft(data.timeLimit);
     } catch (err: any) {
@@ -54,7 +54,7 @@ const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose }) => {
     setIsSubmitting(true);
     
     try {
-      const { data } = await api.post(`/quizzes/${quizId}/attempt`, {
+      const { data } = await api.post(`quizzes/${quizId}/attempt`, {
         answers,
         timeTaken: quiz ? (quiz.timeLimit > 0 ? quiz.timeLimit - timeLeft : timeLeft) : 0
       });

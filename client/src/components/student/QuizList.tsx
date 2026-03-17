@@ -12,7 +12,7 @@ const QuizList: React.FC = () => {
 
   const fetchQuizzes = async () => {
     try {
-      const { data } = await api.get('/quizzes');
+      const { data } = await api.get('quizzes');
       setQuizzes(data);
     } catch (err) {
       console.error('Failed to fetch quizzes', err);

@@ -27,7 +27,7 @@ const QuizResultsView: React.FC<QuizResultsViewProps> = ({ quizId }) => {
 
   const fetchResults = useCallback(async () => {
     try {
-      const { data } = await api.get(`/admin/quizzes/${quizId}/results`);
+      const { data } = await api.get(`admin/quizzes/${quizId}/results`);
       setResults(data);
       
       if (data.length > 0) {
@@ -49,7 +49,7 @@ const QuizResultsView: React.FC<QuizResultsViewProps> = ({ quizId }) => {
 
   const handleExport = async () => {
      try {
-        const res = await api.get('/export/quiz-results', { responseType: 'blob' });
+        const res = await api.get('export/quiz-results', { responseType: 'blob' });
         const url = URL.createObjectURL(res.data);
         const a = document.createElement('a');
         a.href = url;

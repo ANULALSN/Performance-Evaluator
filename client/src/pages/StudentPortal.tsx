@@ -38,8 +38,8 @@ const StudentPortal: React.FC = () => {
       setLoading(true);
       try {
         const [{ data: checkin }, { data: tasks }] = await Promise.all([
-          api.get('/student/today-checkin'),
-          api.get('/student/today-tasks')
+          api.get('student/today-checkin'),
+          api.get('student/today-tasks')
         ]);
         setTodayCheckin(checkin);
         setTodayTasks(tasks);
@@ -54,7 +54,7 @@ const StudentPortal: React.FC = () => {
 
   const handleCompleteTask = async (taskId: string) => {
     try {
-      const { data } = await api.patch(`/student/tasks/${taskId}/complete`);
+      const { data } = await api.patch(`student/tasks/${taskId}/complete`);
       setTodayTasks(data);
     } catch (err) {
       console.error('Task Update Error', err);
@@ -180,7 +180,7 @@ const CheckinView: React.FC<{ todayCheckin: DailyCheckIn | null; onUpdate: (c: D
     e.preventDefault();
     setSubmitting(true);
     try {
-      const { data } = await api.post('/student/checkin', formData);
+      const { data } = await api.post('student/checkin', formData);
       onUpdate(data);
       (window as any).toast?.('Check-in logged successfully!', 'success');
     } catch (err) {
@@ -344,7 +344,7 @@ const ReviewView: React.FC = () => {
       e.preventDefault();
       setSubmitting(true);
       try {
-         const { data } = await api.post('/student/weekly-review', formData);
+         const { data } = await api.post('student/weekly-review', formData);
          setReview(data);
       } catch (err) {
          console.error('Review failed', err);

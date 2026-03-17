@@ -68,7 +68,7 @@ const AuthPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const endpoint = isLogin ? '/auth/login' : '/auth/register';
+      const endpoint = isLogin ? 'auth/login' : 'auth/register';
       const payload = isLogin 
         ? { email: formData.email, password: formData.password }
         : { ...formData };
@@ -154,11 +154,13 @@ const AuthPage: React.FC = () => {
                 >
                   <Input 
                     icon={Mail} label="Email Address" type="email" placeholder="name@example.com"
+                    autoComplete="email"
                     value={formData.email} onChange={(v: string) => setFormData({...formData, email: v})} 
                   />
                   <div className="relative">
                     <Input 
                       icon={Lock} label="Password" type={showPassword ? 'text' : 'password'} placeholder="••••••••"
+                      autoComplete={isLogin ? "current-password" : "new-password"}
                       value={formData.password} onChange={(v: string) => setFormData({...formData, password: v})}
                     />
                     <button 
@@ -179,10 +181,12 @@ const AuthPage: React.FC = () => {
                 >
                   <Input 
                     icon={User} label="Full Name" type="text" placeholder="John Doe"
+                    autoComplete="name"
                     value={formData.name} onChange={(v: string) => setFormData({...formData, name: v})} 
                   />
                   <Input 
                     icon={Mail} label="Email Address" type="email" placeholder="name@example.com"
+                    autoComplete="email"
                     value={formData.email} onChange={(v: string) => setFormData({...formData, email: v})} 
                   />
                   
@@ -190,6 +194,7 @@ const AuthPage: React.FC = () => {
                      <div className="relative">
                         <Input 
                           icon={Lock} label="Password" type={showPassword ? 'text' : 'password'} placeholder="••••••••"
+                          autoComplete="new-password"
                           value={formData.password} onChange={(v: string) => setFormData({...formData, password: v})}
                         />
                         <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 bottom-3.5 text-text-muted">
@@ -203,6 +208,7 @@ const AuthPage: React.FC = () => {
                      </div>
                      <Input 
                        icon={CheckCircle} label="Confirm" type="password" placeholder="••••••••"
+                       autoComplete="new-password"
                        value={formData.confirmPassword} onChange={(v: string) => setFormData({...formData, confirmPassword: v})}
                      />
                   </div>
