@@ -118,8 +118,8 @@ const StudentPortal: React.FC = () => {
       <main className="flex-1 overflow-y-auto px-10 py-10">
         <header className="flex justify-between items-center mb-12">
           <div>
-            <h1 className="text-4xl font-bold font-outfit mb-2 capitalize">{activeTab}</h1>
-            <p className="text-text-muted">Tracking accountability & technical progression.</p>
+            <h1 className="text-2xl font-bold font-outfit mb-2 capitalize">{activeTab}</h1>
+            <p className="text-sm text-text-muted">Tracking accountability & technical progression.</p>
           </div>
 
           <div className="flex gap-4">
@@ -201,8 +201,8 @@ const CheckinView: React.FC<{ todayCheckin: DailyCheckIn | null; onUpdate: (c: D
            <div className="w-20 h-20 bg-accent-green/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-accent-green/20">
               <CheckCircle className="text-accent-green" size={40} />
            </div>
-           <h2 className="text-4xl font-bold font-outfit mb-4">Accountability Logged</h2>
-           <p className="text-lg text-text-muted mb-12">Metrics synchronized. AI feedback is now live.</p>
+           <h2 className="text-2xl font-bold font-outfit mb-2">Accountability Logged</h2>
+           <p className="text-sm text-text-muted mb-8">Metrics synchronized. AI feedback is now live.</p>
            
            <div className="grid md:grid-cols-3 gap-6 text-left">
               <FeedbackCard type="feedback" title="Coach Analysis" content={todayCheckin.aiFeedback} color="purple" icon={UserIcon} />
@@ -217,8 +217,8 @@ const CheckinView: React.FC<{ todayCheckin: DailyCheckIn | null; onUpdate: (c: D
   return (
     <div className="max-w-3xl">
       <div className="mb-12">
-        <h2 className="text-4xl font-bold font-outfit mb-4">Daily Report</h2>
-        <p className="text-xl text-text-muted font-medium italic opacity-60">"Consistency is the only metric that matters at scale."</p>
+        <h2 className="text-2xl font-bold font-outfit mb-2">Daily Report</h2>
+        <p className="text-sm text-text-muted font-medium italic opacity-60">"Consistency is the only metric that matters at scale."</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
@@ -283,8 +283,8 @@ const TasksView: React.FC<{ todayTasks: DailyTask | null; onComplete: (id: strin
       <div className="max-w-4xl space-y-12">
          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/5">
             <div>
-               <h2 className="text-5xl font-bold mb-3 font-outfit tracking-tight">The 3-Objective Rule</h2>
-               <p className="text-text-muted text-lg max-w-xl">Each morning, AI generates three mission-critical tasks based on your current technical trajectory.</p>
+               <h2 className="text-2xl font-bold mb-2 font-outfit tracking-tight">The 3-Objective Rule</h2>
+               <p className="text-text-muted text-sm max-w-xl">Each morning, AI generates three mission-critical tasks based on your current technical trajectory.</p>
             </div>
             <div className="text-right">
                <p className="text-3xl font-black font-outfit mb-2 text-accent-purple">{completedCount}/3 SECURED</p>
@@ -314,7 +314,7 @@ const TasksView: React.FC<{ todayTasks: DailyTask | null; onComplete: (id: strin
                   
                   <div className="flex-1">
                      <span className="text-[10px] uppercase font-black tracking-widest text-accent-purple mb-3 block italic">{task.type} Alignment</span>
-                     <h3 className={`text-2xl font-bold font-outfit transition-all ${task.completed ? 'line-through opacity-50' : ''}`}>{task.title}</h3>
+                     <h3 className={`text-xl font-bold font-outfit transition-all ${task.completed ? 'line-through opacity-50' : ''}`}>{task.title}</h3>
                   </div>
 
                   {!task.completed && <ChevronRight className="text-text-muted group-hover:text-white group-hover:translate-x-2 transition-all" size={24} />}

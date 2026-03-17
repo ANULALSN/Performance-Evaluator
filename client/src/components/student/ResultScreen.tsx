@@ -40,8 +40,8 @@ const ResultScreen: React.FC<ResultScreenProps> = ({ results, quiz, onBack }) =>
            </motion.div>
 
            <div>
-              <h2 className="text-6xl font-outfit font-black mb-2 tracking-tighter">
-                {results.score}% <span className="text-3xl font-bold opacity-30">/ 100%</span>
+              <h2 className="text-4xl font-outfit font-black mb-2 tracking-tighter">
+                {results.score}% <span className="text-xl font-bold opacity-30">/ 100%</span>
               </h2>
               <p className={`text-xl font-bold uppercase tracking-widest ${isPassed ? 'text-accent-green' : 'text-accent-error'}`}>
                 {isPassed ? 'Assessment Pased' : 'Assessment Failed'}
@@ -74,7 +74,7 @@ const ResultScreen: React.FC<ResultScreenProps> = ({ results, quiz, onBack }) =>
                    <div className="flex justify-between items-start gap-6">
                       <div className="space-y-2 flex-1">
                          <span className="text-[10px] uppercase font-black tracking-widest text-text-muted">Question {idx + 1}</span>
-                         <p className="text-xl font-bold leading-relaxed">{item.question}</p>
+                         <p className="text-lg font-bold leading-relaxed">{item.question}</p>
                       </div>
                       <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
                         item.isCorrect ? 'bg-accent-green/10 text-accent-green border border-accent-green/30' : 'bg-accent-error/10 text-accent-error border border-accent-error/30'

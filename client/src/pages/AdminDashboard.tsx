@@ -116,8 +116,8 @@ const AdminDashboard: React.FC = () => {
       <main className="flex-1 overflow-y-auto p-10 relative">
         <header className="flex justify-between items-center mb-12">
            <div>
-              <h1 className="text-4xl font-extrabold font-outfit mb-2 tracking-tighter">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
-              <p className="text-text-muted font-medium">Cohort orchestration & strategic oversight.</p>
+              <h1 className="text-2xl font-extrabold font-outfit mb-2 tracking-tighter">{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
+              <p className="text-text-muted text-sm font-medium">Cohort orchestration & strategic oversight.</p>
            </div>
            
            <div className="flex items-center gap-4">
@@ -162,8 +162,8 @@ const AdminDashboard: React.FC = () => {
                           <div className="card-premium p-8 bg-neutral-900 border-white/5 shadow-2xl">
                              <div className="flex justify-between items-center mb-10">
                                 <div>
-                                   <h3 className="text-xl font-bold font-outfit">Priority Intervention Alerts</h3>
-                                   <p className="text-text-muted text-xs mt-1">Students flagged for immediate follow-up.</p>
+                                   <h3 className="text-lg font-bold font-outfit">Priority Intervention Alerts</h3>
+                                   <p className="text-text-muted text-[10px] mt-1">Students flagged for immediate follow-up.</p>
                                 </div>
                                 <button className="p-2 border border-white/10 rounded-lg text-text-muted">
                                    <MoreVertical size={20} />
@@ -194,7 +194,7 @@ const AdminDashboard: React.FC = () => {
                           </div>
 
                           <div className="card-premium p-10 bg-neutral-950 shadow-2xl">
-                             <h3 className="text-xl font-bold font-outfit mb-10">Real-time Progression Log</h3>
+                             <h3 className="text-lg font-bold font-outfit mb-10">Real-time Progression Log</h3>
                              <div className="space-y-10 relative">
                                 <div className="absolute left-[23px] top-4 bottom-4 w-px bg-white/5"></div>
                                 {students.slice(0, 4).map((s, i) => (
@@ -307,8 +307,8 @@ const AdminDashboard: React.FC = () => {
                          <div className="space-y-12">
                             <div className="flex justify-between items-end">
                                <div>
-                                  <h2 className="text-3xl font-bold font-outfit mb-2">Content Bank</h2>
-                                  <p className="text-text-muted font-medium italic">Create and oversee technical validation modules.</p>
+                                  <h2 className="text-2xl font-bold font-outfit mb-2">Content Bank</h2>
+                                  <p className="text-text-muted text-sm font-medium italic">Create and oversee technical validation modules.</p>
                                </div>
                                <button 
                                  onClick={() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}}
@@ -362,7 +362,7 @@ const ActiveQuizzes: React.FC<{ onSelect: (id: string) => void }> = ({ onSelect 
                   </span>
                   <span className="text-[10px] font-bold text-text-muted uppercase tracking-tighter">{quiz.techStack}</span>
                </div>
-               <h4 className="text-2xl font-bold font-outfit mb-2 leading-tight tracking-tight">{quiz.title}</h4>
+               <h4 className="text-xl font-bold font-outfit mb-2 leading-tight tracking-tight">{quiz.title}</h4>
                <p className="text-text-muted text-sm line-clamp-2 mb-8">{quiz.description}</p>
                
                <div className="mt-auto w-full pt-6 border-t border-white/5 flex items-center justify-between">

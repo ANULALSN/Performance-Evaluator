@@ -102,11 +102,11 @@ const AuthPage: React.FC = () => {
             <div className="w-12 h-12 bg-accent-purple rounded-2xl flex items-center justify-center shadow-lg shadow-accent-purple/20">
               <Zap size={28} className="text-white fill-white" />
             </div>
-            <h1 className="text-4xl font-outfit font-extrabold gradient-text">SIPP</h1>
+            <h1 className="text-2xl font-outfit font-extrabold gradient-text">SIPP</h1>
           </div>
           
           <div className="space-y-12 max-w-lg">
-             <h2 className="text-6xl font-outfit font-bold tracking-tight leading-tight">
+             <h2 className="text-4xl font-outfit font-bold tracking-tight leading-tight">
                Build. Learn. Grow. <br/><span className="text-text-muted">Every Single Day.</span>
              </h2>
 
@@ -137,10 +137,10 @@ const AuthPage: React.FC = () => {
              <h1 className="text-2xl font-outfit font-extrabold gradient-text">SIPP</h1>
           </div>
 
-          <h2 className="text-3xl font-bold font-outfit mb-2">
+          <h2 className="text-2xl font-bold font-outfit mb-2">
             {isLogin ? 'Welcome Back' : 'Create Account'}
           </h2>
-          <p className="text-text-muted mb-10">
+          <p className="text-text-muted text-sm mb-10">
             {isLogin ? 'Enter your credentials to access your dashboard.' : 'Join the cohort and start your accountability journey.'}
           </p>
 

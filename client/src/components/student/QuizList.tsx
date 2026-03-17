@@ -36,8 +36,8 @@ const QuizList: React.FC = () => {
     <div className="space-y-10">
       <div className="flex justify-between items-end">
          <div>
-            <h2 className="text-4xl font-bold font-outfit mb-3">Assessment Hub</h2>
-            <p className="text-text-muted text-lg max-w-xl">Validate your technical depth. Correct answers award accountability points.</p>
+            <h2 className="text-2xl font-bold font-outfit mb-2">Assessment Hub</h2>
+            <p className="text-text-muted text-sm max-w-xl">Validate your technical depth. Correct answers award accountability points.</p>
          </div>
       </div>
 
@@ -73,7 +73,7 @@ const QuizList: React.FC = () => {
                  </div>
               </div>
 
-              <h3 className="text-2xl font-bold font-outfit mb-2 line-clamp-1">{quiz.title}</h3>
+              <h3 className="text-xl font-bold font-outfit mb-2 line-clamp-1">{quiz.title}</h3>
               <p className="text-text-muted text-sm line-clamp-2 mb-6">{quiz.description}</p>
 
               <div className="flex flex-wrap gap-3">

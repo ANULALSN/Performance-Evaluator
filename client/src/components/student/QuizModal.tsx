@@ -221,7 +221,7 @@ const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose }) => {
            animate={{ opacity: 1, x: 0 }}
            className="space-y-12"
          >
-            <h3 className="text-4xl font-outfit font-bold leading-tight">{currentQuestion.question}</h3>
+            <h3 className="text-2xl font-outfit font-bold leading-tight">{currentQuestion.question}</h3>
 
             <div className="grid grid-cols-1 gap-4">
                {currentQuestion.options.map((option, idx) => (
@@ -239,7 +239,7 @@ const QuizModal: React.FC<QuizModalProps> = ({ quizId, onClose }) => {
                     }`}>
                        {String.fromCharCode(65 + idx)}
                     </div>
-                    <span className={`text-xl font-medium ${selectedOption === idx ? 'text-white' : 'text-text-muted group-hover:text-text-primary'}`}>{option}</span>
+                    <span className={`text-lg font-medium ${selectedOption === idx ? 'text-white' : 'text-text-muted group-hover:text-text-primary'}`}>{option}</span>
                  </button>
                ))}
             </div>
