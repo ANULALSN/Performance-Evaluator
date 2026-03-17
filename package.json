@@ -1,0 +1,25 @@
+{
+  "name": "sipp-platform",
+  "version": "1.0.0",
+  "description": "Student Innovator Performance Platform (SIPP)",
+  "main": "server/server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && nodemon server.js",
+    "client": "cd client && npm run dev",
+    "install:all": "npm i && cd client && npm i && cd ../server && npm i"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "axios": "^1.13.6",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.38.0",
+    "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.577.0",
+    "react-router-dom": "^7.13.1",
+    "socket.io-client": "^4.8.3",
+    "tailwind-merge": "^3.5.0"
+  }
+}

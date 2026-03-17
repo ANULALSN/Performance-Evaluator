@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: sipp-backend
+    env: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 18.x
+      - key: MONGODB_URI
+        fromConfig: MONGODB_URI
+      - key: JWT_SECRET
+        fromConfig: JWT_SECRET
+      - key: OPENROUTER_API_KEY
+        fromConfig: OPENROUTER_API_KEY
