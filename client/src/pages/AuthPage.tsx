@@ -50,6 +50,7 @@ const AuthPage: React.FC = () => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Starting auth process...', { isLogin, email: formData.email });
     setError('');
     
     // Client-side validation
@@ -79,6 +80,7 @@ const AuthPage: React.FC = () => {
       if (data.user.role === 'admin') navigate('/admin');
       else navigate('/portal');
     } catch (err: any) {
+      console.error('Auth Error Details:', err);
       setError(err.response?.data?.message || 'Authentication failed');
     } finally {
       setLoading(false);
