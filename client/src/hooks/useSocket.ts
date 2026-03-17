@@ -2,7 +2,16 @@ import { useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAppContext } from '../context/AppContext';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const getSocketURL = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  try {
+    return new URL(apiUrl).origin;
+  } catch {
+    return apiUrl.replace('/api', '');
+  }
+};
+
+const SOCKET_URL = getSocketURL();
 
 export const useSocket = () => {
   const { user, token } = useAppContext();
