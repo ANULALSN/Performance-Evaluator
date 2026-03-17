@@ -18,7 +18,7 @@ High-performance deployment strategy for the Student Innovator Performance Platf
 1. Push the `/client` folder code to GitHub.
 2. In [Vercel](https://vercel.com), create a new project and select the `client` folder.
 3. **Environment Variables**:
-   - `VITE_API_URL`: `https://your-backend.onrender.com/api`
+   - `VITE_API_URL`: `https://performanceevaluator.onrender.com/api`
 4. Deploy.
 
 ## 3. Post-Deployment setup

@@ -5,6 +5,8 @@
   "main": "server/server.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "echo 'Root build not required'",
+    "start": "node server/server.js",
     "server": "cd server && nodemon server.js",
     "client": "cd client && npm run dev",
     "install:all": "npm i && cd client && npm i && cd ../server && npm i"
