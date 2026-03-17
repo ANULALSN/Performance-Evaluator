@@ -66,9 +66,16 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: () => void }> = ({ t
 
   return (
     <motion.div
-      initial={{ x: 100, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: 100, opacity: 0 }}
+      layout
+      initial={{ x: 300, opacity: 0, scale: 0.8, rotate: 5 }}
+      animate={{ x: 0, opacity: 1, scale: 1, rotate: 0 }}
+      exit={{ x: 300, opacity: 0, scale: 0.8 }}
+      transition={{ 
+        type: "spring", 
+        damping: 25, 
+        stiffness: 200,
+        layout: { duration: 0.3 }
+      }}
       className={cn(
         "flex items-center gap-4 min-w-[320px] max-w-[400px] p-5 rounded-2xl border glass shadow-2xl",
         borders[toast.type]

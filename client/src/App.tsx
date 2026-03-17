@@ -1,7 +1,9 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { ToastContainer } from './components/shared/Toast';
+import { AnimatePresence } from 'framer-motion';
+import PageTransition from './components/shared/PageTransition';
 
 // Pages
 import AuthPage from './pages/AuthPage';
@@ -27,33 +29,44 @@ const PrivateRoute: React.FC<{ children: React.ReactElement; role?: 'student' | 
 
 const AppRoutes = () => {
   const { user } = useAppContext();
+  const location = useLocation();
 
   return (
-    <Routes>
-      <Route path="/" element={
-        user ? (
-          <Navigate to={user.role === 'admin' ? '/admin' : '/portal'} />
-        ) : (
-          <Navigate to="/auth" />
-        )
-      } />
-      
-      <Route path="/auth" element={<AuthPage />} />
-      
-      <Route path="/portal/*" element={
-        <PrivateRoute role="student">
-          <StudentPortal />
-        </PrivateRoute>
-      } />
-      
-      <Route path="/admin/*" element={
-        <PrivateRoute role="admin">
-          <AdminDashboard />
-        </PrivateRoute>
-      } />
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={
+          user ? (
+            <Navigate to={user.role === 'admin' ? '/admin' : '/portal'} />
+          ) : (
+            <Navigate to="/auth" />
+          )
+        } />
+        
+        <Route path="/auth" element={
+          <PageTransition>
+            <AuthPage />
+          </PageTransition>
+        } />
+        
+        <Route path="/portal/*" element={
+          <PrivateRoute role="student">
+            <PageTransition>
+              <StudentPortal />
+            </PageTransition>
+          </PrivateRoute>
+        } />
+        
+        <Route path="/admin/*" element={
+          <PrivateRoute role="admin">
+            <PageTransition>
+              <AdminDashboard />
+            </PageTransition>
+          </PrivateRoute>
+        } />
 
-      <Route path="*" element={<Navigate to="/" />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </AnimatePresence>
   );
 };
 

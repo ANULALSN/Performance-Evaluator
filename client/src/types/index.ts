@@ -23,7 +23,7 @@ export interface QuizQuestion {
   options: string[];
   // correctIndex and explanation only for admin
   correctIndex?: number;
-  explanation?: number;
+  explanation?: string;
 }
 
 export interface Quiz {
@@ -85,4 +85,60 @@ export interface DailyTask {
   }[];
   allCompleted: boolean;
   date: string;
+}
+
+export interface CodingTestCase {
+  _id?: string;
+  input: string;
+  expectedOutput: string;
+  isHidden: boolean;
+  explanation?: string;
+}
+
+export interface CodingProblem {
+  _id: string;
+  title: string;
+  description: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  techStack: 'Python' | 'JavaScript' | 'General';
+  starterCode: {
+    python: string;
+    javascript: string;
+  };
+  testCases: CodingTestCase[];
+  constraints: string[];
+  hints: string[];
+  timeLimit: number;
+  pointsReward: number;
+  isActive: boolean;
+  createdAt: string;
+  hasAttempted?: boolean;
+  myScore?: number;
+  status?: 'accepted' | 'partial' | 'failed' | 'error' | null;
+}
+
+export interface CodingAttempt {
+  _id: string;
+  studentId: string;
+  problemId: string | { title: string; difficulty: string };
+  language: 'python' | 'javascript';
+  code: string;
+  testResults: {
+    testCaseId: string;
+    passed: boolean;
+    actualOutput: string;
+    expectedOutput: string;
+    isHidden: boolean;
+    explanation?: string;
+  }[];
+  passedCount: number;
+  totalVisible: number;
+  totalHidden: number;
+  score: number;
+  status: 'accepted' | 'partial' | 'failed' | 'error';
+  errorMessage?: string;
+  timeTaken: number;
+  hintsUsed: number;
+  pointsAwarded: number;
+  attemptedAt: string;
 }

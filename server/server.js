@@ -35,6 +35,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/student', require('./routes/student'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api', require('./routes/quiz'));
+app.use('/api/coding-problems', require('./routes/codingProblems'));
 app.use('/api/export', require('./routes/export'));
 
 // Basic error handling

@@ -2,18 +2,18 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { 
   CheckCircle2, 
-  XCircle, 
-  Trophy, 
   Clock, 
   ChevronLeft,
   Share2,
-  ListRestart,
-  Sparkles,
-  Zap,
   CheckCircle,
-  X
+  X,
+  Zap,
+  Sparkles,
+  ListRestart
 } from 'lucide-react';
-import type { Quiz, QuizAttempt } from '../../types';
+import type { Quiz } from '../../types';
+
+import ScoreCircle from '../shared/ScoreCircle';
 
 interface ResultScreenProps {
   results: any;
@@ -21,30 +21,23 @@ interface ResultScreenProps {
   onBack: () => void;
 }
 
-const ResultScreen: React.FC<ResultScreenProps> = ({ results, quiz, onBack }) => {
+const ResultScreen: React.FC<ResultScreenProps> = ({ results, onBack }) => {
   const isPassed = results.passed;
 
   return (
     <div className="min-h-screen bg-bg-primary py-20 px-10">
       <div className="max-w-4xl mx-auto space-y-12">
         {/* Header Section */}
-        <div className="flex flex-col items-center text-center space-y-6">
-           <motion.div 
-             initial={{ scale: 0, rotate: -20 }}
-             animate={{ scale: 1, rotate: 0 }}
-             className={`w-32 h-32 rounded-full flex items-center justify-center border-4 ${
-               isPassed ? 'border-accent-green bg-accent-green/10 text-accent-green' : 'border-accent-error bg-accent-error/10 text-accent-error'
-             }`}
-           >
-             {isPassed ? <Trophy size={64} /> : <XCircle size={64} />}
-           </motion.div>
+        <div className="flex flex-col items-center text-center space-y-8">
+           <ScoreCircle 
+             score={results.score} 
+             color={isPassed ? '#10b981' : '#ef4444'} 
+             size={200}
+           />
 
            <div>
-              <h2 className="text-4xl font-outfit font-black mb-2 tracking-tighter">
-                {results.score}% <span className="text-xl font-bold opacity-30">/ 100%</span>
-              </h2>
               <p className={`text-xl font-bold uppercase tracking-widest ${isPassed ? 'text-accent-green' : 'text-accent-error'}`}>
-                {isPassed ? 'Assessment Pased' : 'Assessment Failed'}
+                {isPassed ? 'Assessment Passed' : 'Assessment Failed'}
               </p>
            </div>
 

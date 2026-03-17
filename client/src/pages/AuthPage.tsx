@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { 
   Zap, 
   CheckCircle, 
@@ -88,6 +88,16 @@ const AuthPage: React.FC = () => {
   };
 
   const techStacks = ["Python", "JavaScript", "React", "Node.js", "Full Stack", "AI/ML", "General"];
+  const shouldReduceMotion = useReducedMotion();
+
+  const shakeVariants = {
+    shake: { 
+      x: shouldReduceMotion ? 0 : [-10, 10, -8, 8, -4, 4, 0],
+      opacity: 1, 
+      scale: 1,
+      transition: { duration: 0.4 } 
+    }
+  };
 
   return (
     <div className="flex h-screen bg-bg-primary overflow-hidden font-inter">
@@ -107,14 +117,14 @@ const AuthPage: React.FC = () => {
           
           <div className="space-y-12 max-w-lg">
              <h2 className="text-4xl font-outfit font-bold tracking-tight leading-tight">
-               Build. Learn. Grow. <br/><span className="text-text-muted">Every Single Day.</span>
+                Build. Learn. Grow. <br/><span className="text-text-muted">Every Single Day.</span>
              </h2>
 
              <div className="space-y-8">
                <Feature icon={BrainCircuit} title="AI Mentor Analysis" desc="Daily check-ins analyzed by LLMs for precision feedback." />
                <Feature icon={LineChart} title="Growth Tracking" desc="Visual consistency scores and high-performance streaks." />
                <Feature icon={ShieldCheck} title="Cohort Transparency" desc="Real-time leaderboard and objective performance metrics." />
-             </div>
+              </div>
           </div>
         </div>
 
@@ -126,7 +136,7 @@ const AuthPage: React.FC = () => {
       {/* Right Panel: Auth Forms */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-20 overflow-y-auto">
         <motion.div 
-          initial={{ opacity: 0, x: 20 }}
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           className="w-full max-w-md"
         >
@@ -149,9 +159,10 @@ const AuthPage: React.FC = () => {
               {isLogin ? (
                 <motion.div 
                    key="login"
-                   initial={{ opacity: 0, x: 10 }}
+                   initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 20 }}
                    animate={{ opacity: 1, x: 0 }}
-                   exit={{ opacity: 0, x: -10 }}
+                   exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
+                   transition={{ duration: 0.25 }}
                    className="space-y-5"
                 >
                   <Input 
@@ -176,9 +187,10 @@ const AuthPage: React.FC = () => {
               ) : (
                 <motion.div 
                    key="register"
-                   initial={{ opacity: 0, x: 10 }}
+                   initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: 20 }}
                    animate={{ opacity: 1, x: 0 }}
-                   exit={{ opacity: 0, x: -10 }}
+                   exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }}
+                   transition={{ duration: 0.25 }}
                    className="space-y-5"
                 >
                   <Input 
@@ -218,7 +230,7 @@ const AuthPage: React.FC = () => {
                   <div className="space-y-2">
                      <label className="text-xs font-bold uppercase tracking-widest text-text-muted">Tech Stack Focus</label>
                      <select 
-                        className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-accent-purple transation-all text-sm"
+                        className="w-full bg-neutral-900 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-accent-purple transition-all text-sm"
                         value={formData.techStack} onChange={e => setFormData({...formData, techStack: e.target.value})}
                      >
                         {techStacks.map(s => <option key={s} value={s}>{s}</option>)}
@@ -248,7 +260,13 @@ const AuthPage: React.FC = () => {
             </AnimatePresence>
 
             {error && (
-              <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="p-4 bg-accent-error/10 border border-accent-error/20 text-accent-error text-xs font-bold rounded-xl flex items-center gap-2">
+              <motion.div 
+                key={error}
+                variants={shakeVariants}
+                initial={{ opacity: 0, scale: 0.95 }} 
+                animate="shake" 
+                className="p-4 bg-accent-error/10 border border-accent-error/20 text-accent-error text-xs font-bold rounded-xl flex items-center gap-2"
+              >
                 <AlertTriangle size={16} /> {error}
               </motion.div>
             )}

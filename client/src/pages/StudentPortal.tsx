@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
-import type { User, DailyCheckIn, DailyTask } from '../types';
+import type { DailyCheckIn, DailyTask } from '../types';
 import api from '../api';
+import CodingProblemList from '../components/student/CodingProblemList';
 import { 
   CheckCircle, 
   Brain, 
@@ -17,16 +18,20 @@ import {
   TrendingUp,
   AlertCircle,
   Trophy,
-  User as UserIcon
+  User as UserIcon,
+  Code
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Modular Components
 import QuizList from '../components/student/QuizList';
+import LearningHeatmap from '../components/student/LearningHeatmap';
+import CountUp from '../components/shared/CountUp';
 
 const StudentPortal: React.FC = () => {
   const { user, logout } = useAppContext();
   const [activeTab, setActiveTab] = useState<'checkin' | 'tasks' | 'reviews' | 'quizzes' | 'stats'>('checkin');
+  const [activeSubTab, setActiveSubTab] = useState<'mcq' | 'coding'>('mcq');
   const [loading, setLoading] = useState(false);
   
   // Data State
@@ -160,7 +165,29 @@ const StudentPortal: React.FC = () => {
               {activeTab === 'checkin' && <CheckinView todayCheckin={todayCheckin} onUpdate={setTodayCheckin} />}
               {activeTab === 'tasks' && <TasksView todayTasks={todayTasks} onComplete={handleCompleteTask} />}
               {activeTab === 'reviews' && <ReviewView />}
-              {activeTab === 'quizzes' && <QuizList />}
+              {activeTab === 'quizzes' && (
+                <div className="space-y-8">
+                  <div className="flex bg-neutral-900 w-fit p-1 rounded-xl border border-white/5">
+                    <button 
+                      onClick={() => setActiveSubTab('mcq')}
+                      className={`flex items-center gap-2 px-6 py-2 rounded-lg text-xs font-bold transition-all ${
+                        activeSubTab === 'mcq' ? 'bg-accent-purple text-white shadow-lg' : 'text-text-muted hover:text-white'
+                      }`}
+                    >
+                      <Brain size={16} /> MCQ Quizzes
+                    </button>
+                    <button 
+                      onClick={() => setActiveSubTab('coding')}
+                      className={`flex items-center gap-2 px-6 py-2 rounded-lg text-xs font-bold transition-all ${
+                        activeSubTab === 'coding' ? 'bg-accent-blue text-white shadow-lg' : 'text-text-muted hover:text-white'
+                      }`}
+                    >
+                      <Code size={16} /> Coding Challenges
+                    </button>
+                  </div>
+                  {activeSubTab === 'mcq' ? <QuizList /> : <CodingProblemList />}
+                </div>
+              )}
               {activeTab === 'stats' && <ProfileView user={user} />}
             </motion.div>
           </AnimatePresence>
@@ -192,25 +219,41 @@ const CheckinView: React.FC<{ todayCheckin: DailyCheckIn | null; onUpdate: (c: D
 
   if (todayCheckin) {
     return (
-      <div className="max-w-4xl space-y-10">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-4xl space-y-10"
+      >
         <div className="card-premium p-12 text-center relative overflow-hidden bg-neutral-900 shadow-2xl">
            <div className="absolute top-0 right-0 p-8 opacity-5">
               <Sparkles size={160} className="text-accent-purple -rotate-12" />
            </div>
            
-           <div className="w-20 h-20 bg-accent-green/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-accent-green/20">
+           <motion.div 
+             initial={{ scale: 0 }}
+             animate={{ scale: 1 }}
+             transition={{ type: "spring", damping: 10, stiffness: 100 }}
+             className="w-20 h-20 bg-accent-green/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-accent-green/20"
+           >
               <CheckCircle className="text-accent-green" size={40} />
-           </div>
+           </motion.div>
            <h2 className="text-2xl font-bold font-outfit mb-2">Accountability Logged</h2>
            <p className="text-sm text-text-muted mb-8">Metrics synchronized. AI feedback is now live.</p>
            
-           <div className="grid md:grid-cols-3 gap-6 text-left">
-              <FeedbackCard type="feedback" title="Coach Analysis" content={todayCheckin.aiFeedback} color="purple" icon={UserIcon} />
-              <FeedbackCard type="suggestion" title="Strategic Pivot" content={todayCheckin.aiSuggestion} color="blue" icon={Sparkles} />
-              <FeedbackCard type="nextTask" title="Tomorrow's Objective" content={todayCheckin.nextTask} color="amber" icon={Zap} />
-           </div>
+           <motion.div 
+             variants={{
+               show: { transition: { staggerChildren: 0.1 } }
+             }}
+             initial="hidden"
+             animate="show"
+             className="grid md:grid-cols-3 gap-6 text-left"
+           >
+              <FeedbackCard title="Coach Analysis" content={todayCheckin.aiFeedback} color="purple" icon={UserIcon} />
+              <FeedbackCard title="Strategic Pivot" content={todayCheckin.aiSuggestion} color="blue" icon={Sparkles} />
+              <FeedbackCard title="Tomorrow's Objective" content={todayCheckin.nextTask} color="amber" icon={Zap} />
+           </motion.div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
@@ -245,13 +288,19 @@ const FeedbackCard = ({ title, content, color, icon: Icon }: any) => {
   };
 
   return (
-    <div className={`p-6 rounded-2xl border ${colors[color]}`}>
+    <motion.div 
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        show: { opacity: 1, y: 0 }
+      }}
+      className={`p-6 rounded-2xl border ${colors[color]}`}
+    >
        <div className="flex items-center gap-2 mb-4">
           <Icon size={14} className="opacity-80" />
           <p className="text-[10px] font-black uppercase tracking-widest">{title}</p>
        </div>
        <p className="text-sm font-medium leading-relaxed text-white/90 italic">"{content}"</p>
-    </div>
+    </motion.div>
   );
 };
 
@@ -299,18 +348,25 @@ const TasksView: React.FC<{ todayTasks: DailyTask | null; onComplete: (id: strin
                <motion.div 
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
+                  whileHover={!task.completed ? { scale: 1.01, x: 5 } : {}}
+                  whileTap={!task.completed ? { scale: 0.99 } : {}}
                   transition={{ delay: idx * 0.1 }}
                   key={task._id} 
                   className={`card-premium p-8 py-10 flex items-center gap-10 cursor-pointer group transition-all ${
-                    task.completed ? 'opacity-40 border-accent-green/20' : 'hover:translate-x-3 active:scale-[0.99]'
+                    task.completed ? 'opacity-40 border-accent-green/20' : 'hover:border-accent-purple/30'
                   }`}
                   onClick={() => !task.completed && onComplete(task._id)}
                >
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all ${
-                     task.completed ? 'bg-accent-green border-accent-green text-white shadow-lg' : 'bg-neutral-900 border-white/5 text-text-muted group-hover:border-accent-purple group-hover:text-accent-purple'
-                  }`}>
+                  <motion.div 
+                     initial={false}
+                     animate={task.completed ? { scale: [1, 1.25, 1], rotate: [0, 10, 0] } : { scale: 1 }}
+                     transition={{ duration: 0.4 }}
+                     className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all ${
+                        task.completed ? 'bg-accent-green border-accent-green text-white shadow-lg' : 'bg-neutral-900 border-white/5 text-text-muted group-hover:border-accent-purple group-hover:text-accent-purple'
+                     }`}
+                  >
                      {task.completed ? <CheckCircle size={30} /> : <Zap size={30} />}
-                  </div>
+                  </motion.div>
                   
                   <div className="flex-1">
                      <span className="text-[10px] uppercase font-black tracking-widest text-accent-purple mb-3 block italic">{task.type} Alignment</span>
@@ -445,11 +501,15 @@ const ProfileView: React.FC<{ user: any }> = ({ user }) => {
                   <div className="grid grid-cols-2 gap-4">
                      <div>
                         <p className="text-[10px] uppercase font-bold text-text-muted mb-1">XP Points</p>
-                        <p className="font-black text-2xl font-outfit">{user.consistencyScore}</p>
+                        <p className="font-black text-2xl font-outfit">
+                           <CountUp value={user.consistencyScore} />
+                        </p>
                      </div>
                      <div>
                         <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Streak</p>
-                        <p className="font-black text-2xl font-outfit">{user.streak}d</p>
+                        <p className="font-black text-2xl font-outfit">
+                           <CountUp value={user.streak} suffix="d" />
+                        </p>
                      </div>
                   </div>
                </div>
@@ -463,6 +523,7 @@ const ProfileView: React.FC<{ user: any }> = ({ user }) => {
             </div>
 
             <div className="md:col-span-2 space-y-8">
+               <LearningHeatmap />
                <div className="card-premium p-10 h-full border-white/5 bg-neutral-950 shadow-2xl">
                   <h3 className="text-xl font-bold font-outfit mb-8">System Analysis: Cognitive Weakness Tags</h3>
                   <div className="flex flex-wrap gap-3">

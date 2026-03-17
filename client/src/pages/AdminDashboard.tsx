@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import type { User } from '../types';
 import api from '../api';
-import { 
-  Users, 
-  BookOpen, 
-  BarChart3, 
-  Trophy, 
-  Search, 
+import {
+  Users,
+  BookOpen,
+  BarChart3,
+  Trophy,
+  Search,
   AlertCircle,
   TrendingUp,
   User as UserIcon,
@@ -22,22 +22,27 @@ import {
   Target,
   FlaskConical,
   RefreshCw,
-  Loader2
+  Loader2,
+  Code
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 // Modular Components
 import QuizBuilderPage from '../components/admin/QuizBuilderPage';
 import QuizResultsView from '../components/admin/QuizResultsView';
+import CodingProblemManager from '../components/admin/CodingProblemManager';
 
 const AdminDashboard: React.FC = () => {
-  const { user, logout } = useAppContext();
+  const { logout } = useAppContext();
   const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'quizzes' | 'leaderboard'>('overview');
+  const [activeSubTab, setActiveSubTab] = useState<'mcq' | 'coding'>('mcq');
   const [students, setStudents] = useState<User[]>([]);
   const [dropoffs, setDropoffs] = useState<User[]>([]);
   const [analytics, setAnalytics] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
+  const [selectedCodingProblemId, setSelectedCodingProblemId] = useState<string | null>(null);
+  const [isBuildingCoding, setIsBuildingCoding] = useState(false);
 
   const fetchAdminData = async () => {
     setLoading(true);
@@ -57,6 +62,18 @@ const AdminDashboard: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const shouldReduceMotion = useReducedMotion();
+
+  const containerVariants = {
+    hidden: {},
+    show: { transition: { staggerChildren: shouldReduceMotion ? 0 : 0.08 } }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 24 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.35 } }
   };
 
   useEffect(() => {
@@ -152,11 +169,16 @@ const AdminDashboard: React.FC = () => {
               >
                  {activeTab === 'overview' && (
                     <div className="space-y-10">
-                       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                          <StatCard label="Trainee Population" value={analytics?.totalStudents || 0} icon={Users} trend="+4 new this week" color="blue" />
-                          <StatCard label="Technical Accuracy" value={`${Math.round(analytics?.avgScore || 0)}%`} icon={Target} trend="+5% improvement" color="purple" />
-                          <StatCard label="Drop-off Risk" value={dropoffs.length} icon={AlertCircle} subLabel="Inactive 48h+" color="amber" />
-                       </div>
+                       <motion.div 
+                          variants={containerVariants}
+                          initial="hidden"
+                          animate="show"
+                          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                       >
+                          <StatCard label="Trainee Population" value={analytics?.totalStudents || 0} icon={Users} trend="+4 new this week" color="blue" variants={cardVariants} />
+                          <StatCard label="Technical Accuracy" value={`${Math.round(analytics?.avgScore || 0)}%`} icon={Target} trend="+5% improvement" color="purple" variants={cardVariants} />
+                          <StatCard label="Drop-off Risk" value={dropoffs.length} icon={AlertCircle} subLabel="Inactive 48h+" color="amber" variants={cardVariants} />
+                       </motion.div>
 
                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                           <div className="card-premium p-8 bg-neutral-900 border-white/5 shadow-2xl">
@@ -171,7 +193,14 @@ const AdminDashboard: React.FC = () => {
                              </div>
                              <div className="space-y-4">
                                 {dropoffs.length > 0 ? dropoffs.map(s => (
-                                   <div key={s._id} className="p-5 bg-accent-amber/5 border border-accent-amber/10 rounded-2xl flex items-center justify-between group hover:border-accent-amber/30 transition-all">
+                                   <motion.div 
+                                      key={s._id}
+                                      animate={shouldReduceMotion ? {} : {
+                                         backgroundColor: ['rgba(245, 158, 11, 0.05)', 'rgba(245, 158, 11, 0.1)', 'rgba(245, 158, 11, 0.05)']
+                                      }}
+                                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                      className="p-5 border border-accent-amber/10 rounded-2xl flex items-center justify-between group hover:border-accent-amber/30 transition-all"
+                                   >
                                       <div className="flex items-center gap-6">
                                          <div className="w-12 h-12 bg-accent-amber/10 rounded-xl flex items-center justify-center text-accent-amber shadow-inner">
                                             <UserIcon size={24} />
@@ -184,7 +213,7 @@ const AdminDashboard: React.FC = () => {
                                       <button className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-text-muted group-hover:bg-accent-amber group-hover:text-bg-primary transition-all">
                                          <ChevronRight size={20} />
                                       </button>
-                                   </div>
+                                   </motion.div>
                                 )) : (
                                    <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-3xl">
                                       <p className="text-text-muted italic text-sm">No critical inactivity detected across the cohort.</p>
@@ -293,47 +322,178 @@ const AdminDashboard: React.FC = () => {
 
                  {activeTab === 'quizzes' && (
                     <div className="space-y-8">
-                       {selectedQuizId ? (
-                         <div className="space-y-8">
-                             <button 
-                               onClick={() => setSelectedQuizId(null)}
-                               className="flex items-center gap-2 text-text-muted hover:text-white transition-all font-bold text-sm"
-                             >
-                               <ChevronRight size={18} className="rotate-180" /> Back to Assessment Bank
-                             </button>
-                             <QuizResultsView quizId={selectedQuizId} />
-                         </div>
-                       ) : (
-                         <div className="space-y-12">
-                            <div className="flex justify-between items-end">
-                               <div>
-                                  <h2 className="text-2xl font-bold font-outfit mb-2">Content Bank</h2>
-                                  <p className="text-text-muted text-sm font-medium italic">Create and oversee technical validation modules.</p>
+                      <div className="flex bg-neutral-900 w-fit p-1 rounded-xl border border-white/5 mb-10">
+                        <button 
+                          onClick={() => setActiveSubTab('mcq')}
+                          className={`flex items-center gap-2 px-6 py-2 rounded-lg text-xs font-bold transition-all ${
+                            activeSubTab === 'mcq' ? 'bg-accent-blue text-white shadow-lg' : 'text-text-muted hover:text-white'
+                          }`}
+                        >
+                          <FlaskConical size={16} /> MCQ Manager
+                        </button>
+                        <button 
+                          onClick={() => setActiveSubTab('coding')}
+                          className={`flex items-center gap-2 px-6 py-2 rounded-lg text-xs font-bold transition-all ${
+                            activeSubTab === 'coding' ? 'bg-accent-blue text-white shadow-lg' : 'text-text-muted hover:text-white'
+                          }`}
+                        >
+                          <Code size={16} /> Coding Challenges
+                        </button>
+                      </div>
+
+                      {activeSubTab === 'mcq' ? (
+                        selectedQuizId ? (
+                          <div className="space-y-8">
+                              <button 
+                                onClick={() => setSelectedQuizId(null)}
+                                className="flex items-center gap-2 text-text-muted hover:text-white transition-all font-bold text-sm"
+                              >
+                                <ChevronRight size={18} className="rotate-180" /> Back to Assessment Bank
+                              </button>
+                              <QuizResultsView quizId={selectedQuizId} />
+                          </div>
+                        ) : (
+                          <div className="space-y-12">
+                             <div className="flex justify-between items-end">
+                                <div>
+                                   <h2 className="text-2xl font-bold font-outfit mb-2">Content Bank</h2>
+                                   <p className="text-text-muted text-sm font-medium italic">Create and oversee technical validation modules.</p>
+                                </div>
+                                <button 
+                                  onClick={() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}}
+                                  className="btn-primary flex items-center gap-2 py-3 px-6 h-12"
+                                >
+                                   <FlaskConical size={20} /> Create New Assessment
+                                </button>
+                             </div>
+                             
+                             <ActiveQuizzes onSelect={setSelectedQuizId} />
+                             
+                             <div className="pt-12 border-t border-white/5">
+                                <h3 className="text-2xl font-bold font-outfit mb-10">Module Architect</h3>
+                                <QuizBuilderPage />
+                             </div>
+                          </div>
+                        )
+                      ) : (
+                        <div className="space-y-12">
+                          {isBuildingCoding || selectedCodingProblemId ? (
+                             <div className="space-y-8">
+                                <button 
+                                   onClick={() => { setSelectedCodingProblemId(null); setIsBuildingCoding(false); }}
+                                   className="flex items-center gap-2 text-text-muted hover:text-white transition-all font-bold text-sm"
+                                >
+                                   <ChevronRight size={18} className="rotate-180" /> Back to Challenge Bank
+                                </button>
+                                <h2 className="text-2xl font-bold font-outfit">{selectedCodingProblemId ? 'Edit Challenge' : 'New Coding Challenge'}</h2>
+                                <CodingProblemManager 
+                                   problemId={selectedCodingProblemId || undefined} 
+                                   onSave={() => { 
+                                      setSelectedCodingProblemId(null); 
+                                      setIsBuildingCoding(false);
+                                   }} 
+                                />
+                             </div>
+                          ) : (
+                            <div className="space-y-12">
+                               <div className="flex justify-between items-end">
+                                  <div>
+                                     <h2 className="text-2xl font-bold font-outfit mb-2">Technical Challenges</h2>
+                                     <p className="text-text-muted text-sm font-medium italic">Manage server-side code execution problems.</p>
+                                  </div>
+                                  <div className="flex gap-4">
+                                     <button 
+                                       onClick={async () => {
+                                          if (window.confirm("Seed demo problems?")) {
+                                             await api.post('coding-problems/admin/coding-problems/seed');
+                                             window.location.reload();
+                                          }
+                                       }}
+                                       className="btn-secondary flex items-center gap-2 py-3 px-6 h-12"
+                                     >
+                                        <RefreshCw size={20} /> Seed Demo
+                                     </button>
+                                     <button 
+                                       onClick={() => setIsBuildingCoding(true)}
+                                       className="btn-primary flex items-center gap-2 py-3 px-6 h-12"
+                                     >
+                                        <Code size={20} /> Create Challenge
+                                     </button>
+                                  </div>
                                </div>
-                               <button 
-                                 onClick={() => { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}}
-                                 className="btn-primary flex items-center gap-2 py-3 px-6 h-12"
-                               >
-                                  <FlaskConical size={20} /> Create New Assessment
-                               </button>
+                               
+                               <ActiveCodingProblems onSelect={setSelectedCodingProblemId} />
                             </div>
-                            
-                            <ActiveQuizzes onSelect={setSelectedQuizId} />
-                            
-                            <div className="pt-12 border-t border-white/5">
-                               <h3 className="text-2xl font-bold font-outfit mb-10">Module Architect</h3>
-                               <QuizBuilderPage />
-                            </div>
-                         </div>
-                       )}
+                          )}
+                        </div>
+                      )}
                     </div>
-                 )}
-              </motion.div>
-           </AnimatePresence>
-        )}
+                  )}
+               </motion.div>
+            </AnimatePresence>
+         )}
       </main>
     </div>
   );
+};
+
+const ActiveCodingProblems: React.FC<{ onSelect: (id: string) => void }> = ({ onSelect }) => {
+   const [problems, setProblems] = useState<any[]>([]);
+   
+   const fetchProblems = async () => {
+      try {
+         const { data } = await api.get('coding-problems/admin/coding-problems');
+         setProblems(data);
+      } catch (err) {
+         console.error(err);
+      }
+   };
+
+   useEffect(() => { fetchProblems(); }, []);
+
+   const toggleActive = async (id: string) => {
+      try {
+         await api.patch(`coding-problems/admin/coding-problems/${id}/toggle`);
+         fetchProblems();
+      } catch (err) {
+         console.error(err);
+      }
+   };
+
+   return (
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+         {problems.map(problem => (
+            <div key={problem._id} className="card-premium p-8 py-10 flex flex-col items-start bg-neutral-900 border-white/5 shadow-2xl">
+               <div className="flex justify-between items-center w-full mb-6">
+                  <button 
+                    onClick={() => toggleActive(problem._id)}
+                    className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all ${
+                      problem.isActive ? 'bg-accent-green/10 text-accent-green border-accent-green/20' : 'bg-white/5 text-text-muted border-white/10'
+                    }`}
+                  >
+                    {problem.isActive ? 'Active' : 'Draft'}
+                  </button>
+                  <span className="text-[10px] font-bold text-text-muted uppercase tracking-tighter">{problem.techStack} • {problem.difficulty}</span>
+               </div>
+               <h4 className="text-xl font-bold font-outfit mb-2 leading-tight tracking-tight">{problem.title}</h4>
+               <p className="text-text-muted text-sm line-clamp-2 mb-8">{problem.description}</p>
+               
+               <div className="mt-auto w-full pt-6 border-t border-white/5 flex items-center justify-between">
+                  <div>
+                     <p className="text-[10px] uppercase font-black tracking-widest text-text-muted">Reward</p>
+                     <p className="font-bold text-lg font-outfit">{problem.pointsReward} Points</p>
+                  </div>
+                  <button 
+                    onClick={() => onSelect(problem._id)}
+                    className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-accent-blue hover:bg-accent-blue hover:text-white transition-all shadow-lg"
+                  >
+                     <ArrowUpRight size={24} />
+                  </button>
+               </div>
+            </div>
+         ))}
+      </div>
+   );
 };
 
 const ActiveQuizzes: React.FC<{ onSelect: (id: string) => void }> = ({ onSelect }) => {
@@ -386,18 +546,23 @@ const ActiveQuizzes: React.FC<{ onSelect: (id: string) => void }> = ({ onSelect 
 const NavItem = ({ id, label, icon: Icon, active, setActive }: any) => (
    <button
       onClick={() => setActive(id)}
-      className={`w-full flex items-center gap-4 p-4 rounded-xl transition-all ${
-      active === id 
-         ? 'bg-accent-blue/10 text-accent-blue ring-1 ring-accent-blue/30 font-bold' 
-         : 'text-text-muted hover:bg-neutral-800/50'
-      }`}
+      className="relative w-full flex items-center gap-4 p-4 rounded-xl transition-all"
    >
-      <Icon size={22} />
-      <span className="lg:block hidden text-sm font-medium">{label}</span>
+      {active === id && (
+         <motion.div 
+            layoutId="admin-nav-indicator"
+            className="absolute inset-0 bg-accent-blue/10 ring-1 ring-accent-blue/30 rounded-xl"
+            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+         />
+      )}
+      <div className={`relative z-10 flex items-center gap-4 ${active === id ? 'text-accent-blue font-bold' : 'text-text-muted hover:text-white'}`}>
+         <Icon size={22} />
+         <span className="lg:block hidden text-sm font-medium">{label}</span>
+      </div>
    </button>
 );
 
-const StatCard = ({ label, value, icon: Icon, trend, subLabel, color }: any) => {
+const StatCard = ({ label, value, icon: Icon, trend, subLabel, color, variants }: any) => {
    const colors: any = {
       blue: 'text-accent-blue bg-accent-blue/10 border-accent-blue/20',
       purple: 'text-accent-purple bg-accent-purple/10 border-accent-purple/20',
@@ -405,7 +570,7 @@ const StatCard = ({ label, value, icon: Icon, trend, subLabel, color }: any) => 
    };
 
    return (
-      <div className="card-premium h-fit bg-neutral-900 border-white/5 p-8 shadow-2xl">
+      <motion.div variants={variants} className="card-premium h-fit bg-neutral-900 border-white/5 p-8 shadow-2xl">
          <div className="flex justify-between items-start mb-10">
             <div className={`p-4 rounded-2xl border ${colors[color]}`}>
                <Icon size={28} />
@@ -417,7 +582,7 @@ const StatCard = ({ label, value, icon: Icon, trend, subLabel, color }: any) => 
             <span className="text-5xl font-black font-outfit tracking-tighter">{value}</span>
             {subLabel && <span className="text-text-muted text-xs font-bold uppercase tracking-widest opacity-40">{subLabel}</span>}
          </div>
-      </div>
+      </motion.div>
    );
 };
 

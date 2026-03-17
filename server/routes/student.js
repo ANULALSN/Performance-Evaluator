@@ -6,6 +6,8 @@ const Student = require('../models/Student');
 const DailyCheckIn = require('../models/DailyCheckIn');
 const DailyTask = require('../models/DailyTask');
 const WeeklyReview = require('../models/WeeklyReview');
+const QuizAttempt = require('../models/QuizAttempt');
+const CodingAttempt = require('../models/CodingAttempt');
 const { generateCheckinFeedback, generateDailyTasks, generateWeeklyReview } = require('../services/aiService');
 
 // App-wide guard for student routes
@@ -158,6 +160,102 @@ router.post('/weekly-review', async (req, res) => {
     await student.save();
 
     res.json(review);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * @route GET /api/student/heatmap
+ * @desc Get student learning activity heatmap data
+ */
+router.get('/heatmap', async (req, res) => {
+  try {
+    const days = parseInt(req.query.days) || 365;
+    const studentId = req.user.id;
+    
+    // Calculate start date
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - (days - 1));
+    startDate.setHours(0, 0, 0, 0);
+    
+    const startDateStr = startDate.toISOString().split('T')[0];
+
+    // Fetch all relevant data in parallel
+    const [checkins, dailyTasks, quizAttempts, codingAttempts] = await Promise.all([
+      DailyCheckIn.find({ studentId, date: { $gte: startDateStr } }),
+      DailyTask.find({ studentId, date: { $gte: startDateStr } }),
+      QuizAttempt.find({ studentId, attemptedAt: { $gte: startDate } }),
+      CodingAttempt.find({ studentId, attemptedAt: { $gte: startDate } })
+    ]);
+
+    // Create a map for easy lookup by date
+    const dataByDate = {};
+
+    // Helper to get date string from various formats
+    const getDateStr = (val) => {
+      if (typeof val === 'string') return val.split('T')[0];
+      return new Date(val).toISOString().split('T')[0];
+    };
+
+    checkins.forEach(c => {
+      const d = getDateStr(c.date);
+      if (!dataByDate[d]) dataByDate[d] = { score: 0, checkIn: false, tasksCompleted: 0, extraActivity: false };
+      dataByDate[d].checkIn = true;
+      dataByDate[d].score += (c.pointsAwarded || 1);
+    });
+
+    dailyTasks.forEach(dt => {
+      const d = getDateStr(dt.date);
+      if (!dataByDate[d]) dataByDate[d] = { score: 0, checkIn: false, tasksCompleted: 0, extraActivity: false };
+      dataByDate[d].tasksCompleted = dt.tasks.filter(t => t.completed).length;
+      dataByDate[d].score += (dt.pointsAwarded || 0);
+    });
+
+    quizAttempts.forEach(qa => {
+      const d = getDateStr(qa.attemptedAt);
+      if (!dataByDate[d]) dataByDate[d] = { score: 0, checkIn: false, tasksCompleted: 0, extraActivity: false };
+      dataByDate[d].extraActivity = true;
+      dataByDate[d].score += 2; // Assuming 2 points per quiz attempt for heatmap leveling
+    });
+
+    codingAttempts.forEach(ca => {
+      const d = getDateStr(ca.attemptedAt);
+      if (!dataByDate[d]) dataByDate[d] = { score: 0, checkIn: false, tasksCompleted: 0, extraActivity: false };
+      dataByDate[d].extraActivity = true;
+      dataByDate[d].score += 3; // Assuming 3 points per coding attempt
+    });
+
+    // Generate result for exactly X days
+    const result = [];
+    const curr = new Date(startDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < days; i++) {
+        const dStr = curr.toISOString().split('T')[0];
+        const dayData = dataByDate[dStr] || { score: 0, checkIn: false, tasksCompleted: 0, extraActivity: false };
+        
+        let level = 0;
+        if (dayData.checkIn || dayData.extraActivity || dayData.tasksCompleted > 0) {
+            if (dayData.score >= 7) level = 4;
+            else if (dayData.score >= 4) level = 3;
+            else if (dayData.score >= 2) level = 2;
+            else level = 1;
+        }
+
+        result.push({
+            date: dStr,
+            level,
+            score: dayData.score,
+            checkIn: dayData.checkIn,
+            tasksCompleted: dayData.tasksCompleted
+        });
+        
+        curr.setDate(curr.getDate() + 1);
+    }
+
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
