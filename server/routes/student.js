@@ -75,7 +75,8 @@ router.get('/today-tasks', async (req, res) => {
     
     if (!dailyTask) {
       const student = await Student.findById(req.user.id);
-      const aiTasks = await generateDailyTasks(student);
+      const lastCheckin = await DailyCheckIn.findOne({ studentId: req.user.id }).sort({ submittedAt: -1 });
+      const aiTasks = await generateDailyTasks(student, lastCheckin);
       
       dailyTask = new DailyTask({
         studentId: req.user.id,
@@ -259,6 +260,45 @@ router.get('/heatmap', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// GET /api/student/notifications
+router.get('/notifications', async (req, res) => {
+    try {
+        const student = await Student.findById(req.user.id).select('notifications');
+        res.json(student.notifications.sort((a,b) => b.createdAt - a.createdAt));
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PATCH /api/student/notifications/:id/read
+router.patch('/notifications/:id/read', async (req, res) => {
+    try {
+        const student = await Student.findById(req.user.id);
+        const notification = student.notifications.id(req.params.id);
+        if (notification) {
+            notification.read = true;
+            await student.save();
+        }
+        res.json({ message: 'Marked as read' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// PATCH /api/student/onboarding-complete
+router.patch('/onboarding-complete', async (req, res) => {
+    try {
+        const student = await Student.findByIdAndUpdate(
+            req.user.id,
+            { hasCompletedOnboarding: true },
+            { new: true }
+        );
+        res.json(student);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 module.exports = router;

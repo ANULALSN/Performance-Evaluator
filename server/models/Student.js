@@ -19,9 +19,17 @@ const studentSchema = new mongoose.Schema({
   isVerified: { type: Boolean, default: true },
   consistencyScore: { type: Number, default: 0 },
   weeklyScore: { type: Number, default: 0 },
+  lastWeeklyScore: { type: Number, default: 0 },
   streak: { type: Number, default: 0 },
   weaknessTags: [String],
-  lastActiveAt: { type: Date, default: Date.now }
+  lastActiveAt: { type: Date, default: Date.now },
+  notifications: [{
+    message: String,
+    fromAdmin: { type: Boolean, default: true },
+    read: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now }
+  }],
+  hasCompletedOnboarding: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Student', studentSchema);

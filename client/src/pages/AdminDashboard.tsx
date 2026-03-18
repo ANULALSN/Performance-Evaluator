@@ -8,22 +8,18 @@ import {
   BarChart3,
   Trophy,
   Search,
-  AlertCircle,
-  TrendingUp,
-  User as UserIcon,
   ChevronRight,
   Filter,
   LogOut,
-  Clock,
-  Download,
-  Zap,
-  ArrowUpRight,
-  MoreVertical,
   Target,
   FlaskConical,
   RefreshCw,
   Loader2,
-  Code
+  Code,
+  ShieldCheck,
+  Download,
+  TrendingUp,
+  ArrowUpRight
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
@@ -31,32 +27,27 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import QuizBuilderPage from '../components/admin/QuizBuilderPage';
 import QuizResultsView from '../components/admin/QuizResultsView';
 import CodingProblemManager from '../components/admin/CodingProblemManager';
+import InterventionCenter from '../components/admin/InterventionCenter';
+import StudentProfileDrawer from '../components/admin/StudentProfileDrawer';
 
 const AdminDashboard: React.FC = () => {
   const { logout } = useAppContext();
   const [activeTab, setActiveTab] = useState<'overview' | 'students' | 'quizzes' | 'leaderboard'>('overview');
   const [activeSubTab, setActiveSubTab] = useState<'mcq' | 'coding'>('mcq');
   const [students, setStudents] = useState<User[]>([]);
-  const [dropoffs, setDropoffs] = useState<User[]>([]);
-  const [analytics, setAnalytics] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const [selectedCodingProblemId, setSelectedCodingProblemId] = useState<string | null>(null);
   const [isBuildingCoding, setIsBuildingCoding] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
   const fetchAdminData = async () => {
     setLoading(true);
     try {
-      const [{ data: sData }, { data: aData }] = await Promise.all([
+      const [{ data: sData }] = await Promise.all([
         api.get('admin/students'),
-        api.get('admin/analytics')
       ]);
       setStudents(sData);
-      setAnalytics(aData);
-      
-      // Filter dropoffs (inactive 48h+)
-      const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
-      setDropoffs(sData.filter((s: User) => new Date(s.lastActiveAt) < fortyEightHoursAgo));
     } catch (err) {
       console.error('Admin Data Error', err);
     } finally {
@@ -65,16 +56,6 @@ const AdminDashboard: React.FC = () => {
   };
 
   const shouldReduceMotion = useReducedMotion();
-
-  const containerVariants = {
-    hidden: {},
-    show: { transition: { staggerChildren: shouldReduceMotion ? 0 : 0.08 } }
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 24 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.35 } }
-  };
 
   useEffect(() => {
     fetchAdminData();
@@ -106,7 +87,7 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         <nav className="flex-1 space-y-2">
-          <NavItem id="overview" label="Dashboard" icon={BarChart3} active={activeTab} setActive={setActiveTab} />
+          <NavItem id="overview" label="Intervention Center" icon={ShieldCheck} active={activeTab} setActive={setActiveTab} />
           <NavItem id="students" label="Student Roster" icon={Users} active={activeTab} setActive={setActiveTab} />
           <NavItem id="quizzes" label="Content Bank" icon={BookOpen} active={activeTab} setActive={setActiveTab} />
           <NavItem id="leaderboard" label="High Performers" icon={Trophy} active={activeTab} setActive={setActiveTab} />
@@ -168,88 +149,7 @@ const AdminDashboard: React.FC = () => {
                 transition={{ duration: 0.2 }}
               >
                  {activeTab === 'overview' && (
-                    <div className="space-y-10">
-                       <motion.div 
-                          variants={containerVariants}
-                          initial="hidden"
-                          animate="show"
-                          className="grid grid-cols-1 md:grid-cols-3 gap-8"
-                       >
-                          <StatCard label="Trainee Population" value={analytics?.totalStudents || 0} icon={Users} trend="+4 new this week" color="blue" variants={cardVariants} />
-                          <StatCard label="Technical Accuracy" value={`${Math.round(analytics?.avgScore || 0)}%`} icon={Target} trend="+5% improvement" color="purple" variants={cardVariants} />
-                          <StatCard label="Drop-off Risk" value={dropoffs.length} icon={AlertCircle} subLabel="Inactive 48h+" color="amber" variants={cardVariants} />
-                       </motion.div>
-
-                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                          <div className="card-premium p-8 bg-neutral-900 border-white/5 shadow-2xl">
-                             <div className="flex justify-between items-center mb-10">
-                                <div>
-                                   <h3 className="text-lg font-bold font-outfit">Priority Intervention Alerts</h3>
-                                   <p className="text-text-muted text-[10px] mt-1">Students flagged for immediate follow-up.</p>
-                                </div>
-                                <button className="p-2 border border-white/10 rounded-lg text-text-muted">
-                                   <MoreVertical size={20} />
-                                </button>
-                             </div>
-                             <div className="space-y-4">
-                                {dropoffs.length > 0 ? dropoffs.map(s => (
-                                   <motion.div 
-                                      key={s._id}
-                                      animate={shouldReduceMotion ? {} : {
-                                         backgroundColor: ['rgba(245, 158, 11, 0.05)', 'rgba(245, 158, 11, 0.1)', 'rgba(245, 158, 11, 0.05)']
-                                      }}
-                                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                                      className="p-5 border border-accent-amber/10 rounded-2xl flex items-center justify-between group hover:border-accent-amber/30 transition-all"
-                                   >
-                                      <div className="flex items-center gap-6">
-                                         <div className="w-12 h-12 bg-accent-amber/10 rounded-xl flex items-center justify-center text-accent-amber shadow-inner">
-                                            <UserIcon size={24} />
-                                         </div>
-                                         <div>
-                                            <p className="font-bold text-white tracking-tight">{s.name}</p>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-accent-amber opacity-60">Stagnant since {new Date(s.lastActiveAt).toLocaleDateString()}</p>
-                                         </div>
-                                      </div>
-                                      <button className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-text-muted group-hover:bg-accent-amber group-hover:text-bg-primary transition-all">
-                                         <ChevronRight size={20} />
-                                      </button>
-                                   </motion.div>
-                                )) : (
-                                   <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-3xl">
-                                      <p className="text-text-muted italic text-sm">No critical inactivity detected across the cohort.</p>
-                                   </div>
-                                )}
-                             </div>
-                          </div>
-
-                          <div className="card-premium p-10 bg-neutral-950 shadow-2xl">
-                             <h3 className="text-lg font-bold font-outfit mb-10">Real-time Progression Log</h3>
-                             <div className="space-y-10 relative">
-                                <div className="absolute left-[23px] top-4 bottom-4 w-px bg-white/5"></div>
-                                {students.slice(0, 4).map((s, i) => (
-                                   <div key={s._id} className="flex gap-8 relative z-10">
-                                      <div className={`w-12 h-12 rounded-2xl border flex items-center justify-center shrink-0 transition-all ${
-                                        i === 0 ? 'bg-accent-purple border-accent-purple shadow-lg shadow-accent-purple/20 text-white' : 'bg-neutral-900 border-white/5 text-text-muted'
-                                      }`}>
-                                         {i === 0 ? <Zap size={22} className="fill-white" /> : <Clock size={20} />}
-                                      </div>
-                                      <div className="flex-1">
-                                         <p className="font-bold text-sm text-text-primary tracking-tight">
-                                           {s.name} <span className="text-text-muted font-medium ml-2">— Synchronized 3/3 daily objectives</span>
-                                         </p>
-                                         <div className="flex items-center gap-3 mt-2">
-                                            <div className="px-2 py-0.5 bg-white/5 rounded text-[8px] font-black uppercase text-accent-blue">{s.techStack}</div>
-                                            <div className="text-[10px] font-bold text-accent-green italic flex items-center gap-1">
-                                              <ArrowUpRight size={12} /> XP Velocity +15%
-                                            </div>
-                                         </div>
-                                      </div>
-                                   </div>
-                                ))}
-                             </div>
-                          </div>
-                       </div>
-                    </div>
+                    <InterventionCenter />
                  )}
 
                  {activeTab === 'students' && (
@@ -283,7 +183,11 @@ const AdminDashboard: React.FC = () => {
                              </thead>
                              <tbody className="divide-y divide-white/5">
                                 {students.map((s, idx) => (
-                                   <tr key={s._id} className="hover:bg-white/[0.02] transition-colors group">
+                                   <tr 
+                                     key={s._id} 
+                                     onClick={() => setSelectedStudentId(s._id)}
+                                     className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
+                                   >
                                       <td className="px-8 py-6 font-outfit font-black text-xs text-text-muted">#{idx + 1}</td>
                                       <td className="px-8 py-6">
                                          <div className="flex items-center gap-4">
@@ -320,6 +224,13 @@ const AdminDashboard: React.FC = () => {
                     </div>
                  )}
 
+                 {activeTab === 'leaderboard' && (
+                     <div className="text-center py-20 bg-neutral-900 rounded-3xl border border-white/5">
+                        <Trophy size={48} className="mx-auto text-accent-amber mb-4" />
+                        <h2 className="text-2xl font-bold font-outfit">Leaderboard is under maintenance</h2>
+                        <p className="text-text-muted text-sm px-10">We are currently recalibrating the achievement algorithm. Check back soon for high performer insights.</p>
+                     </div>
+                  )}
                  {activeTab === 'quizzes' && (
                     <div className="space-y-8">
                       <div className="flex bg-neutral-900 w-fit p-1 rounded-xl border border-white/5 mb-10">
@@ -433,6 +344,11 @@ const AdminDashboard: React.FC = () => {
             </AnimatePresence>
          )}
       </main>
+
+      <StudentProfileDrawer 
+        studentId={selectedStudentId} 
+        onClose={() => setSelectedStudentId(null)} 
+      />
     </div>
   );
 };
@@ -561,29 +477,5 @@ const NavItem = ({ id, label, icon: Icon, active, setActive }: any) => (
       </div>
    </button>
 );
-
-const StatCard = ({ label, value, icon: Icon, trend, subLabel, color, variants }: any) => {
-   const colors: any = {
-      blue: 'text-accent-blue bg-accent-blue/10 border-accent-blue/20',
-      purple: 'text-accent-purple bg-accent-purple/10 border-accent-purple/20',
-      amber: 'text-accent-amber bg-accent-amber/10 border-accent-amber/20'
-   };
-
-   return (
-      <motion.div variants={variants} className="card-premium h-fit bg-neutral-900 border-white/5 p-8 shadow-2xl">
-         <div className="flex justify-between items-start mb-10">
-            <div className={`p-4 rounded-2xl border ${colors[color]}`}>
-               <Icon size={28} />
-            </div>
-            {trend && <span className="text-[10px] font-black uppercase tracking-widest text-accent-green bg-accent-green/10 border border-accent-green/20 px-3 py-1.5 rounded-full">{trend}</span>}
-         </div>
-         <h4 className="text-text-muted text-xs uppercase font-black tracking-widest mb-1 opacity-60 font-inter">{label}</h4>
-         <div className="flex items-baseline gap-3">
-            <span className="text-5xl font-black font-outfit tracking-tighter">{value}</span>
-            {subLabel && <span className="text-text-muted text-xs font-bold uppercase tracking-widest opacity-40">{subLabel}</span>}
-         </div>
-      </motion.div>
-   );
-};
 
 export default AdminDashboard;

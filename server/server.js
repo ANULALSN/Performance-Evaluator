@@ -37,6 +37,22 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api', require('./routes/quiz'));
 app.use('/api/coding-problems', require('./routes/codingProblems'));
 app.use('/api/export', require('./routes/export'));
+app.use('/api/admin/interventions', require('./routes/interventions'));
+
+const cron = require('node-cron');
+const { analyzeInterventions } = require('./services/interventionService');
+
+// Schedule daily midnight analysis
+cron.schedule('0 0 * * *', async () => {
+    console.log('⏰ Running daily intervention analysis...');
+    try {
+        const result = await analyzeInterventions();
+        io.to("admin_room").emit("daily_report", result.stats);
+        console.log('✅ Daily report generated & broadcasted.');
+    } catch (err) {
+        console.error('❌ Cron Analysis Error:', err);
+    }
+});
 
 // Basic error handling
 app.use((err, req, res, next) => {

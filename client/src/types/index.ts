@@ -10,6 +10,7 @@ export interface User {
   streak: number;
   weaknessTags: string[];
   lastActiveAt: string;
+  hasCompletedOnboarding?: boolean;
 }
 
 export interface AuthResponse {

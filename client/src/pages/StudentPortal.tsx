@@ -27,18 +27,32 @@ import { motion, AnimatePresence } from 'framer-motion';
 import QuizList from '../components/student/QuizList';
 import LearningHeatmap from '../components/student/LearningHeatmap';
 import CountUp from '../components/shared/CountUp';
+import NotificationBell from '../components/student/NotificationBell';
+import OnboardingFlow from '../components/student/OnboardingFlow';
 
 const StudentPortal: React.FC = () => {
   const { user, logout } = useAppContext();
-  const [activeTab, setActiveTab] = useState<'checkin' | 'tasks' | 'reviews' | 'quizzes' | 'stats'>('checkin');
+  const [activeTab, setActiveTab] = useState<'checkin' | 'tasks' | 'reviews' | 'quizzes' | 'stats'>(
+    user?.hasCompletedOnboarding ? 'checkin' : 'tasks'
+  );
   const [activeSubTab, setActiveSubTab] = useState<'mcq' | 'coding'>('mcq');
   const [loading, setLoading] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(!user?.hasCompletedOnboarding);
+  
+  // Update tab when user loads if they just finished onboarding
+  useEffect(() => {
+    if (user?.hasCompletedOnboarding && showOnboarding) {
+        setShowOnboarding(false);
+        setActiveTab('tasks');
+    }
+  }, [user?.hasCompletedOnboarding]);
   
   // Data State
   const [todayCheckin, setTodayCheckin] = useState<DailyCheckIn | null>(null);
   const [todayTasks, setTodayTasks] = useState<DailyTask | null>(null);
 
   useEffect(() => {
+    if (showOnboarding) return;
     const init = async () => {
       setLoading(true);
       try {
@@ -55,7 +69,7 @@ const StudentPortal: React.FC = () => {
       }
     };
     init();
-  }, []);
+  }, [showOnboarding]);
 
   const handleCompleteTask = async (taskId: string) => {
     try {
@@ -76,6 +90,14 @@ const StudentPortal: React.FC = () => {
 
   return (
     <div className="flex h-screen bg-bg-primary overflow-hidden">
+      {showOnboarding && (
+        <OnboardingFlow 
+          onComplete={() => {
+            setShowOnboarding(false);
+            setActiveTab('tasks');
+          }} 
+        />
+      )}
       {/* Sidebar */}
       <aside className="w-20 lg:w-72 bg-bg-secondary border-r border-white/5 p-6 flex flex-col items-center lg:items-start">
         <div className="flex items-center gap-3 mb-12">
@@ -127,7 +149,8 @@ const StudentPortal: React.FC = () => {
             <p className="text-sm text-text-muted">Tracking accountability & technical progression.</p>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
+             <NotificationBell />
              <div className="glass px-6 py-3 flex items-center gap-6">
                 <div className="flex items-center gap-2">
                    <Zap size={20} className="text-accent-purple fill-accent-purple" />

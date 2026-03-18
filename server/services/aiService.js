@@ -114,21 +114,32 @@ Diagnose their week and build a roadmap in JSON:
   }
 };
 
-const generateDailyTasks = async (student) => {
+const generateDailyTasks = async (student, lastCheckin = null) => {
+  let context = "";
+  if (lastCheckin) {
+    context = `
+Recent Context:
+Learning Goal: ${lastCheckin.learned}
+Current Project: ${lastCheckin.built}
+Biggest Blocker: ${lastCheckin.problem}
+`;
+  }
+
   const prompt = `Student: ${student.name} (${student.skillLevel}, ${student.techStack})
+${context}
 Generate 3 mission-critical technical goals for today in JSON:
 { 
-  "concept": "Conceptual depth task", 
-  "feature": "Functional implementation task", 
-  "debug": "Performance or bug resolution task" 
+  "concept": "Conceptual depth task related to their goal or blocker", 
+  "feature": "Functional implementation task related to their project", 
+  "debug": "Performance or bug resolution task for their blocker" 
 }`;
 
   try {
     const res = await callAI(prompt);
     return {
       concept: res.concept || "Master advanced asynchronous flow control",
-      feature: "Implement a robust data layer for your project",
-      debug: "Profile memory usage and optimize rendering cycles"
+      feature: res.feature || "Implement a robust data layer for your project",
+      debug: res.debug || "Profile memory usage and optimize rendering cycles"
     };
   } catch (err) {
     return {
