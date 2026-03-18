@@ -9,6 +9,7 @@ import PageTransition from './components/shared/PageTransition';
 import AuthPage from './pages/AuthPage';
 import StudentPortal from './pages/StudentPortal';
 import AdminDashboard from './pages/AdminDashboard';
+import CardPage from './pages/CardPage';
 
 const PrivateRoute: React.FC<{ children: React.ReactElement; role?: 'student' | 'admin' }> = ({ children, role }) => {
   const { user, loading } = useAppContext();
@@ -62,6 +63,12 @@ const AppRoutes = () => {
               <AdminDashboard />
             </PageTransition>
           </PrivateRoute>
+        } />
+
+        <Route path="/card/:studentId" element={
+          <PageTransition>
+            <CardPage />
+          </PageTransition>
         } />
 
         <Route path="*" element={<Navigate to="/" />} />

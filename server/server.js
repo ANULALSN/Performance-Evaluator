@@ -58,6 +58,7 @@ app.use('/api', require('./routes/quiz'));
 app.use('/api/coding-problems', require('./routes/codingProblems'));
 app.use('/api/export', require('./routes/export'));
 app.use('/api/admin/interventions', require('./routes/interventions'));
+app.use('/api/card', require('./routes/card'));
 
 const cron = require('node-cron');
 const { analyzeInterventions } = require('./services/interventionService');

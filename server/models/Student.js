@@ -29,7 +29,16 @@ const studentSchema = new mongoose.Schema({
     read: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now }
   }],
-  hasCompletedOnboarding: { type: Boolean, default: false }
+  hasCompletedOnboarding: { type: Boolean, default: false },
+  cardRarity: {
+    type: String,
+    enum: ['common', 'uncommon', 'rare', 'epic', 'legendary'],
+    default: 'common'
+  },
+  cardTitle: { type: String, default: 'The Beginner' },
+  level: { type: Number, default: 1 },
+  xp: { type: Number, default: 0 },
+  totalXpEarned: { type: Number, default: 0 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Student', studentSchema);

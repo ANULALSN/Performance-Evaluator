@@ -3,6 +3,9 @@ import { useAppContext } from '../context/AppContext';
 import type { DailyCheckIn, DailyTask } from '../types';
 import api from '../api';
 import CodingProblemList from '../components/student/CodingProblemList';
+import StudentCard from '../components/student/StudentCard';
+import CardDownload from '../components/student/CardDownload';
+import type { CardData } from '../components/student/StudentCard';
 import { 
   CheckCircle, 
   Brain, 
@@ -506,76 +509,174 @@ const ReviewField = ({ label, value, onChange }: any) => (
    </div>
 );
 
+const rarityColors: Record<string, string> = {
+  common: '#4a4a6a', uncommon: '#4a9eff', rare: '#9d4edd', epic: '#ffd700', legendary: '#ff0080'
+};
+
 const ProfileView: React.FC<{ user: any }> = ({ user }) => {
+   const [cardData, setCardData] = useState<CardData | null>(null);
+   const [cardLoading, setCardLoading] = useState(true);
+   const [upgradeOpen, setUpgradeOpen] = useState(false);
+
+   useEffect(() => {
+     const fetchCard = async () => {
+       try {
+         const { data } = await api.get('card/me');
+         setCardData(data);
+       } catch (err) {
+         console.error('Card fetch error', err);
+       } finally {
+         setCardLoading(false);
+       }
+     };
+     fetchCard();
+   }, []);
+
+   const rarityColor = cardData ? rarityColors[cardData.cardRarity] || '#4a4a6a' : '#4a4a6a';
+
    return (
       <div className="max-w-5xl space-y-12">
-         <div className="grid md:grid-cols-3 gap-8">
-            <div className="md:col-span-1 space-y-8">
-               <div className="card-premium p-10 text-center bg-neutral-900 shadow-2xl relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-accent-purple/5 to-transparent pointer-events-none"></div>
-                  <div className="w-24 h-24 bg-accent-purple/10 rounded-3xl flex items-center justify-center mx-auto mb-6 text-accent-purple border border-accent-purple/20">
-                     <UserIcon size={48} />
-                  </div>
-                  <h2 className="text-3xl font-black font-outfit tracking-tighter">{user.name}</h2>
-                  <p className="text-accent-purple font-black text-[10px] uppercase tracking-widest mt-2">{user.skillLevel} Specialist</p>
-                  
-                  <div className="w-full h-px bg-white/5 my-8"></div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                     <div>
-                        <p className="text-[10px] uppercase font-bold text-text-muted mb-1">XP Points</p>
-                        <p className="font-black text-2xl font-outfit">
-                           <CountUp value={user.consistencyScore} />
-                        </p>
-                     </div>
-                     <div>
-                        <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Streak</p>
-                        <p className="font-black text-2xl font-outfit">
-                           <CountUp value={user.streak} suffix="d" />
-                        </p>
-                     </div>
-                  </div>
-               </div>
-               
-               <div className="card-premium p-8">
-                  <h3 className="font-black text-[10px] uppercase tracking-widest text-text-muted mb-6">Expertise Profile</h3>
-                  <div className="flex flex-wrap gap-2">
-                     <span className="px-3 py-1.5 bg-neutral-900 border border-white/5 text-white rounded-lg text-xs font-bold">{user.techStack}</span>
-                  </div>
-               </div>
-            </div>
+         {/* ── My Card Section ── */}
+         <div>
+           <div className="flex items-center justify-between mb-8">
+             <div>
+               <h2 className="text-2xl font-bold font-outfit mb-1">My SIPP Card</h2>
+               <p className="text-text-muted text-sm">Your shareable performance identity. Download and share to LinkedIn, Twitter or WhatsApp.</p>
+             </div>
+             {cardData && (
+               <span
+                 className="text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full"
+                 style={{ background: `${rarityColor}22`, color: rarityColor, border: `1px solid ${rarityColor}55` }}
+               >
+                 ◆ {cardData.cardRarity.toUpperCase()}
+               </span>
+             )}
+           </div>
 
-            <div className="md:col-span-2 space-y-8">
-               <LearningHeatmap />
-               <div className="card-premium p-10 h-full border-white/5 bg-neutral-950 shadow-2xl">
-                  <h3 className="text-xl font-bold font-outfit mb-8">System Analysis: Cognitive Weakness Tags</h3>
-                  <div className="flex flex-wrap gap-3">
-                     {user.weaknessTags && user.weaknessTags.length > 0 ? user.weaknessTags.map((tag: string, i: number) => (
-                        <div key={i} className="px-5 py-2.5 bg-accent-amber/5 border border-accent-amber/20 text-accent-amber rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                           <AlertCircle size={14} /> {tag}
-                        </div>
-                     )) : (
-                        <div className="py-12 w-full text-center glass border-dashed">
-                           <p className="text-text-muted italic text-sm">Log your first check-in to generate cognitive mapping.</p>
-                        </div>
-                     )}
-                  </div>
-                  
-                  <div className="mt-20 p-10 bg-accent-purple/5 border border-accent-purple/20 rounded-3xl relative overflow-hidden group">
-                     <div className="relative z-10">
-                        <h4 className="text-2xl font-black mb-3 flex items-center gap-3 font-outfit text-accent-purple tracking-tighter">
-                           Certification Roadmap
-                        </h4>
-                        <p className="text-white/40 text-sm leading-relaxed max-w-lg font-medium">
-                           Your performance metrics are being analyzed for cohort eligibility. Maintain a 5-day streak to unlock advanced technical pushed content and peer review sessions.
-                        </p>
-                     </div>
-                     <div className="absolute right-[-40px] top-[-40px] p-24 opacity-5 rotate-12 group-hover:rotate-45 group-hover:opacity-10 transition-all duration-700">
-                        <Zap size={200} className="text-accent-purple" />
-                     </div>
-                  </div>
+           <div className="flex flex-col lg:flex-row gap-10 items-start">
+             {/* Card preview */}
+             <div className="flex-shrink-0">
+               {cardLoading ? (
+                 <div
+                   className="flex items-center justify-center"
+                   style={{ width: 400, height: 560, background: 'rgba(255,255,255,0.02)', borderRadius: 18, border: '1px solid rgba(255,255,255,0.05)' }}
+                 >
+                   <Loader2 size={36} className="text-accent-purple animate-spin" />
+                 </div>
+               ) : cardData ? (
+                 <motion.div
+                   initial={{ opacity: 0, scale: 0.95 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   transition={{ duration: 0.5, type: 'spring' }}
+                 >
+                   <StudentCard data={cardData} />
+                 </motion.div>
+               ) : (
+                 <div
+                   className="flex flex-col items-center justify-center gap-3 text-text-muted"
+                   style={{ width: 400, height: 560, background: 'rgba(255,255,255,0.02)', borderRadius: 18, border: '1px solid rgba(255,255,255,0.05)' }}
+                 >
+                   <Trophy size={40} className="opacity-30" />
+                   <p className="text-sm">Complete a check-in to unlock your card</p>
+                 </div>
+               )}
+             </div>
+
+             {/* Right panel: share + upgrade guide */}
+             <div className="flex-1 space-y-8">
+               {/* Share buttons */}
+               {cardData && (
+                 <div>
+                   <h3 className="font-black text-[10px] uppercase tracking-widest text-text-muted mb-5">Share Your Card</h3>
+                   <CardDownload data={cardData} />
+                 </div>
+               )}
+
+               {/* Rarity upgrade guide */}
+               <div className="card-premium p-6">
+                 <button
+                   onClick={() => setUpgradeOpen(v => !v)}
+                   className="w-full flex items-center justify-between text-left"
+                 >
+                   <span className="font-bold text-sm">🏅 How to Upgrade Your Card Tier</span>
+                   <ChevronRight size={16} className={`text-text-muted transition-transform ${upgradeOpen ? 'rotate-90' : ''}`} />
+                 </button>
+                 <AnimatePresence>
+                   {upgradeOpen && (
+                     <motion.div
+                       initial={{ height: 0, opacity: 0 }}
+                       animate={{ height: 'auto', opacity: 1 }}
+                       exit={{ height: 0, opacity: 0 }}
+                       className="overflow-hidden"
+                     >
+                       <div className="pt-5 space-y-4">
+                         {[
+                           { rarity: 'Uncommon 🔷', color: '#4a9eff', tip: 'Reach 50+ consistency score' },
+                           { rarity: 'Rare 💜',     color: '#9d4edd', tip: 'Score 100+ points AND maintain a 7-day streak' },
+                           { rarity: 'Epic 💎',     color: '#ffd700', tip: 'Break into the top 20% of your cohort by score' },
+                           { rarity: 'Legendary 👑', color: '#ff0080', tip: 'Reach top 3 all-time OR achieve a 30-day streak' },
+                         ].map(item => (
+                           <div key={item.rarity} className="flex items-start gap-3">
+                             <span className="text-xs font-black uppercase mt-0.5" style={{ color: item.color, minWidth: 90 }}>
+                               {item.rarity}
+                             </span>
+                             <span className="text-xs text-text-muted leading-relaxed">{item.tip}</span>
+                           </div>
+                         ))}
+                       </div>
+                     </motion.div>
+                   )}
+                 </AnimatePresence>
                </div>
-            </div>
+
+               {/* Profile stats */}
+               <div className="card-premium p-6">
+                 <h3 className="font-black text-[10px] uppercase tracking-widest text-text-muted mb-5">Core Stats</h3>
+                 <div className="grid grid-cols-2 gap-4">
+                   <div>
+                     <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Total Score</p>
+                     <p className="font-black text-2xl font-outfit"><CountUp value={user.consistencyScore} /></p>
+                   </div>
+                   <div>
+                     <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Streak</p>
+                     <p className="font-black text-2xl font-outfit"><CountUp value={user.streak} suffix="d" /></p>
+                   </div>
+                   {cardData && (
+                     <>
+                       <div>
+                         <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Level</p>
+                         <p className="font-black text-2xl font-outfit">LV.{cardData.level}</p>
+                       </div>
+                       <div>
+                         <p className="text-[10px] uppercase font-bold text-text-muted mb-1">Rank</p>
+                         <p className="font-black text-2xl font-outfit">#{cardData.rank}</p>
+                       </div>
+                     </>
+                   )}
+                 </div>
+               </div>
+
+               {/* Weakness tags */}
+               <div className="card-premium p-6">
+                 <h3 className="font-black text-[10px] uppercase tracking-widest text-text-muted mb-5">Cognitive Weakness Tags</h3>
+                 <div className="flex flex-wrap gap-2">
+                   {user.weaknessTags && user.weaknessTags.length > 0 ? user.weaknessTags.map((tag: string, i: number) => (
+                     <div key={i} className="px-4 py-2 bg-accent-amber/5 border border-accent-amber/20 text-accent-amber rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                       <AlertCircle size={12} /> {tag}
+                     </div>
+                   )) : (
+                     <p className="text-text-muted italic text-sm">Complete check-ins to generate your cognitive map.</p>
+                   )}
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
+
+         {/* ── Heatmap section ── */}
+         <div>
+           <h2 className="text-2xl font-bold font-outfit mb-8">Learning Activity</h2>
+           <LearningHeatmap />
          </div>
       </div>
    );
