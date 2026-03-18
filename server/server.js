@@ -16,7 +16,27 @@ const io = new Server(httpServer, {
 });
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:4173'
+].filter(Boolean);
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    // Allow any onrender.com subdomain (deployed frontend)
+    if (origin.endsWith('.onrender.com')) return callback(null, true);
+    // Allow listed origins
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error('CORS: Origin not allowed'));
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Attach Socket.io to request object
